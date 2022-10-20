@@ -44,8 +44,8 @@
             // FairPlay specific variables. These will be set on Safari.
             var isSafariDetected = false;
             var fairPlayCertificateUrl = "https://global-video.media.golottie.com/certificates/bbeda043-8381-425f-9381-20c20d9124ae_0882dfac-91f9-4df9-a034-af3300db0243.cer";
-            var fairPlayLicenseServer = "https://dev.api.golottie.com/v1/acquire-license/fairplay/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ";
-            var widevineLienseServer = "https://dev.api.golottie.com/v1/acquire-license/widevine/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ";
+            var fairPlayLicenseServer = "http://localhost:8080/v1/acquire-license/fairplay/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ";
+            var widevineLienseServer = "http://localhost:8080/v1/acquire-license/widevine/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ";
             var auth = "Basic YW5kcm9pZF9jbGllbnQ6TGdKZTBHZDRXODVKRHQxUg==";
 
             // Detect if the browser is Safari.
@@ -103,6 +103,7 @@
                         if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
                             // This is the specific header name and value the server wants:
                             request.headers['Authorization'] = auth;
+                            request.headers['Content-Type'] = "application/octet-stream";
                         }
 
                     });
