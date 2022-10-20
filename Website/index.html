@@ -4,7 +4,8 @@
 <head>
     <title>Axinom DRM quick start demo player</title>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/shaka-player/4.2.1/shaka-player.compiled.debug.js"></script>
+    <script type="text/javascript"
+        src="https://ajax.googleapis.com/ajax/libs/shaka-player/4.2.1/shaka-player.compiled.debug.js"></script>
     <style>
         video#videoPlayer {
             width: 640px;
@@ -27,7 +28,8 @@
         <p>Refresh the page to go back to the video catalog.</p>
     </div>
     <div>
-        <p>Supported browsers: Google Chrome, Mozilla Firefox, Microsoft Edge, Internet Explorer 11, Apple Safari 13+</p>
+        <p>Supported browsers: Google Chrome, Mozilla Firefox, Microsoft Edge, Internet Explorer 11, Apple Safari 13+
+        </p>
         <p>Note: multi-key demo videos are not supported on IE11.</p>
     </div>
 
@@ -41,7 +43,10 @@
 
             // FairPlay specific variables. These will be set on Safari.
             var isSafariDetected = false;
-            var fairPlayCertificateUrl = "https://vtb.axinom.com/FPScert/fairplay.cer";
+            var fairPlayCertificateUrl = "https://global-video.media.golottie.com/certificates/bbeda043-8381-425f-9381-20c20d9124ae_0882dfac-91f9-4df9-a034-af3300db0243.cer";
+            var fairPlayLicenseServer = "https://dev.api.golottie.com/v1/acquire-license/fairplay/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ";
+            var widevineLienseServer = "https://dev.api.golottie.com/v1/acquire-license/widevine/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ";
+            var auth = "Basic YW5kcm9pZF9jbGllbnQ6TGdKZTBHZDRXODVKRHQxUg==";
 
             // Detect if the browser is Safari.
             isSafariDetected = navigator.vendor.includes('Apple');
@@ -57,119 +62,115 @@
                 // This will prove to the license server that we have the right to play 
                 // the video and configure any playback restrictions.
 
-                $.getJSON("/api/authorization/" + encodeURIComponent(video.name))
-                .done(function(licenseToken) {
-                    // We got a license token! We are all set to start playback.
-                    // We just pass it on to the player and have it take care of the rest.
+                console.log("Starting Shaka player playback .")
 
-                    console.log("Starting Shaka player playback with license token: " + licenseToken)
+                shaka.log.setLevel(shaka.log.Level.INFO);
 
-                    shaka.log.setLevel(shaka.log.Level.INFO);
+                // Install built-in polyfills to patch browser incompatibilities.
+                shaka.polyfill.installAll();
 
-                    // Install built-in polyfills to patch browser incompatibilities.
-                    shaka.polyfill.installAll();
+                // Check to see if the browser supports the basic APIs Shaka needs.
+                if (shaka.Player.isBrowserSupported()) {
 
-                    // Check to see if the browser supports the basic APIs Shaka needs.
-                    if (shaka.Player.isBrowserSupported()) {
+                    // Create a Player instance.
+                    var player = new shaka.Player($videoPlayer[0]);
 
-                        // Create a Player instance.
-                        var player = new shaka.Player($videoPlayer[0]);
+                    // Attach player to the window to make it easy to access in the JS console.
+                    window.player = player;
 
-                        // Attach player to the window to make it easy to access in the JS console.
-                        window.player = player;
+                    // Listen for error events.
+                    player.addEventListener('error', onErrorEvent);
 
-                        // Listen for error events.
-                        player.addEventListener('error', onErrorEvent);
-
-                        // Configure Axinom DRM license services.
-                        player.configure({
-                            drm: {
-                                servers: {
-                                    'com.widevine.alpha': 'https://drm-widevine-licensing.axprod.net/AcquireLicense',
-                                    'com.microsoft.playready': 'https://drm-playready-licensing.axprod.net/AcquireLicense',
-                                    'com.apple.fps': 'https://drm-fairplay-licensing.axprod.net/AcquireLicense'
-                                },
-                                advanced: {
-                                    'com.apple.fps': {
-                                        'serverCertificateUri': fairPlayCertificateUrl
-                                    }
+                    // Configure Axinom DRM license services.
+                    player.configure({
+                        drm: {
+                            servers: {
+                                'com.widevine.alpha': widevineLienseServer,
+                                // 'com.microsoft.playready': 'https://drm-playready-licensing.axprod.net/AcquireLicense',
+                                'com.apple.fps': fairPlayLicenseServer
+                            },
+                            advanced: {
+                                'com.apple.fps': {
+                                    'serverCertificateUri': fairPlayCertificateUrl
                                 }
                             }
-                        });
-                       
-                        // Add the "X-AxDRM-Message" header, containing the license token, to the header
-                        // of all license requests.
-                        player.getNetworkingEngine().registerRequestFilter(function(type, request) {
-                            if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
-                                // This is the specific header name and value the server wants:
-                                request.headers['X-AxDRM-Message'] = licenseToken;
-                            }
-
-                        });
-
-                        // Try to load a manifest. This is an asynchronous process.
-                        player.load(video.url).then(function() {
-                            // This runs if the asynchronous load is successful.
-                            // onError() is executed if the asynchronous load fails.
-                            console.log('The video has now been loaded!');
-                        }).catch(onError);
-                    } else {
-                        // This browser does not have the minimum set of APIs we need.
-                        console.error('Browser not supported!');
-                    }
-
-                    $loadingPanel.hide();
-                    $videoPlayerPanel.show();
-                })
-                .fail(function() {
-                    console.log("ERROR - failed to get license token.");
-                });
-            }
-
-            // Let's first populate the video list.
-            $.getJSON("/api/catalog/videos")
-            .done(function(videos) {
-                console.log("Server provided " + videos.length + " videos.");
-
-                $.each(videos, function(index, video) {
-                    // On Safari let's display only videos that support FairPlay. On other browsers,
-                    // let's just show everything else since our other demo videos support both
-                    // Widevine and PlayReady.
-                    if ((!video.tags && isSafariDetected) || (video.tags && video.tags.filter(function(tag) {
-                        tag = tag.toLowerCase();
-                        if (isSafariDetected && tag === "fairplay") {
-                            return true;
-                        } else if (!isSafariDetected && tag !== "fairplay") {
-                            return true;
-                        } else {
-                            return false;
                         }
-                    }).length == 0)) {
-                        console.log("Video \"" + video.name + "\" is not supported on current platform, hiding it...");
-                        return;
-                    }
-
-                    console.log("Video \"" + video.name + "\" is at URL " + video.url);
-
-                    // This makes the list item for this video.
-                    var link = $("<a href=\"#\">");
-                    link.text(video.name);
-                    var listItem = $("<li>").append(link);
-                    $videoList.append(listItem);
-                    link.click(function () {
-                        playVideo(video);
-                        return false;
                     });
-                });
 
-                console.log("Loading complete.");
+                    // Add the "X-AxDRM-Message" header, containing the license token, to the header
+                    // of all license requests.
+                    player.getNetworkingEngine().registerRequestFilter(function (type, request) {
+                        if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
+                            // This is the specific header name and value the server wants:
+                            request.headers['Authorization'] = auth;
+                        }
+
+                    });
+
+                    // Try to load a manifest. This is an asynchronous process.
+                    player.load(video.url).then(function () {
+                        // This runs if the asynchronous load is successful.
+                        // onError() is executed if the asynchronous load fails.
+                        console.log('The video has now been loaded!');
+                    }).catch(onError);
+                } else {
+                    // This browser does not have the minimum set of APIs we need.
+                    console.error('Browser not supported!');
+                }
 
                 $loadingPanel.hide();
-                $videoListPanel.show();
-            })
-            .fail(function() {
-                console.log("API call to get video catalog failed!");
+                $videoPlayerPanel.show();
+
+            }
+
+            var videos = [
+                {
+                    "name": "Axinom demo video - single key (DASH; cenc)", 
+                    "url": "https://global-video.media.golottie.com/0f0921c9-ab8a-4235-93fb-92aa5d0b427d/CMAF1/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ==.mpd" 
+                },
+                {
+                    "name": "Axinom demo video - single key (HLS; cbcs)",
+                    "url": "https://global-video.media.golottie.com/0f0921c9-ab8a-4235-93fb-92aa5d0b427d/CMAF1/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ==.m3u8",
+                    "tags": ["FairPlay"]
+                }
+            ];
+
+            $.each(videos, function (index, video) {
+                // On Safari let's display only videos that support FairPlay. On other browsers,
+                // let's just show everything else since our other demo videos support both
+                // Widevine and PlayReady.
+                if ((!video.tags && isSafariDetected) || (video.tags && video.tags.filter(function (tag) {
+                    tag = tag.toLowerCase();
+                    if (isSafariDetected && tag === "fairplay") {
+                        return true;
+                    } else if (!isSafariDetected && tag !== "fairplay") {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }).length == 0)) {
+                    console.log("Video \"" + video.name + "\" is not supported on current platform, hiding it...");
+                    return;
+                }
+
+                console.log("Video \"" + video.name + "\" is at URL " + video.url);
+
+                // This makes the list item for this video.
+                var link = $("<a href=\"#\">");
+                link.text(video.name);
+                var listItem = $("<li>").append(link);
+                $videoList.append(listItem);
+                link.click(function () {
+                    playVideo(video);
+                    return false;
+                });
             });
+
+            console.log("Loading complete.");
+
+            $loadingPanel.hide();
+            $videoListPanel.show();
+
 
             // Shaka error handlers.
             function onErrorEvent(event) {
