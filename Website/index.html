@@ -42,10 +42,11 @@
             var $videoPlayer = $("#videoPlayer");
 
             // FairPlay specific variables. These will be set on Safari.
+            var resourceId = "MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ";
             var isSafariDetected = false;
             var fairPlayCertificateUrl = "https://global-video.media.golottie.com/certificates/bbeda043-8381-425f-9381-20c20d9124ae_0882dfac-91f9-4df9-a034-af3300db0243.cer";
-            var fairPlayLicenseServer = "http://localhost:8080/v1/acquire-license/fairplay/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ";
-            var widevineLienseServer = "http://localhost:8080/v1/acquire-license/widevine/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ";
+            var fairPlayLicenseServer = "http://localhost:8080/v1/acquire-license/fairplay/" + resourceId;
+            var widevineLienseServer = "http://localhost:8080/v1/acquire-license/widevine/" + resourceId;
             var auth = "Basic YW5kcm9pZF9jbGllbnQ6TGdKZTBHZDRXODVKRHQxUg==";
 
             // Detect if the browser is Safari.
@@ -127,11 +128,11 @@
             var videos = [
                 {
                     "name": "Axinom demo video - single key (DASH; cenc)", 
-                    "url": "https://global-video.media.golottie.com/0f0921c9-ab8a-4235-93fb-92aa5d0b427d/CMAF1/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ==.mpd" 
+                    "url": "https://global-video.media.golottie.com/e88f3417-bf7d-4b3c-a9a6-cfc3cd46d688/CMAF1/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ==.mpd" 
                 },
                 {
                     "name": "Axinom demo video - single key (HLS; cbcs)",
-                    "url": "https://global-video.media.golottie.com/0f0921c9-ab8a-4235-93fb-92aa5d0b427d/CMAF1/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ==.m3u8",
+                    "url": "https://global-video.media.golottie.com/e88f3417-bf7d-4b3c-a9a6-cfc3cd46d688/CMAF1/MjAyMi0wOS0yMVQxNDowMDo0NC40MTRaX3MzOi8vc3R1ZGlvLWhhbWJ1cmctaW5jb21pbmcvTG90dGllL1BhdWxhVW5kUGF1bGEvc3R1ZGlvaGFtYnVyZy0xNDY2NjZfUGF1bGFVbmRQYXVsYV9zMDFfZTE5LUZ1bGwtTWV6el9TRC1kZS1ERQ==.m3u8",
                     "tags": ["FairPlay"]
                 }
             ];
